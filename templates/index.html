@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Livros Disponíveis</title>    
+</head>
+<body>
+    <div class="container">
+        <h1>Livros Disponíveis 📚</h1>
+        <div class="livros" id="livros"></div>
+    </div>
+    <script>
+        async function carregarLivros() {
+            const resposta = await fetch('/livros');
+            const livros = await resposta.json();
+            const divLivros = document.getElementById('livros');
+
+            livros.forEach(livro => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h2>${livro.titulo}</h2>
+                    <p>Preço: <strong>${livro.preco}</strong></p>
+                `;
+                divLivros.appendChild(card);
+            });
+        }
+
+        carregarLivros();
+    </script>
+</body>
+</html>
