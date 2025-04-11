@@ -1,34 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/style.css">
-    <title>Livros Disponíveis</title>    
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>📚 Encontre seu livro</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    </head>
+    
 <body>
     <div class="container">
-        <h1>Livros Disponíveis 📚</h1>
-        <div class="livros" id="livros"></div>
+        <h1>📚 Encontre seu livro</h1>
+        <form method="POST" action="/">
+            <input type="text" name="termo" placeholder="Digite aqui...">
+            <button type="submit">Buscar</button>
+        </form>
+        
+
+        <div id="loading" class="hidden">
+            <div class="loader"></div>
+            <p>Procurando livros para você...</p>
+        </div>
+
+        <div id="resultados"></div>
     </div>
+
+    <div id="loading" style="display:none;">
+        <span>H</span>
+        <span>A</span>
+        <span>L</span>
+        <span>L</span>
+        <span>I</span>
+        <span>B</span>
+        <span>U</span>
+        <span>R</span>
+        <span>T</span>
+        <span>O</span>
+        <span>N</span>
+    </div>
+    
+    </div>    
+
     <script>
-        async function carregarLivros() {
-            const resposta = await fetch('/livros');
-            const livros = await resposta.json();
-            const divLivros = document.getElementById('livros');
+        const form = document.getElementById('form-busca');
+        const loading = document.getElementById('loading');
+        const resultados = document.getElementById('resultados');
 
-            livros.forEach(livro => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <h2>${livro.titulo}</h2>
-                    <p>Preço: <strong>${livro.preco}</strong></p>
-                `;
-                divLivros.appendChild(card);
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            resultados.innerHTML = '';
+            loading.classList.remove('hidden');
+
+            const query = form.query.value;
+            const response = await fetch('/buscar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
             });
-        }
 
-        carregarLivros();
+            const data = await response.json();
+            loading.classList.add('hidden');
+
+            for (const site in data) {
+                const siteDiv = document.createElement('div');
+                siteDiv.classList.add('resultado-site');
+                siteDiv.innerHTML = `<h2>${site}</h2>`;
+
+                if (data[site].length === 0) {
+                    siteDiv.innerHTML += '<p>Nenhum livro encontrado.</p>';
+                } else {
+                    data[site].forEach(livro => {
+                        siteDiv.innerHTML += `
+                            <div class="livro">
+                                <strong>${livro.titulo}</strong><br>
+                                <em>${livro.preco}</em>
+                            </div>
+                        `;
+                    });
+                }
+                resultados.appendChild(siteDiv);
+            }
+        });
     </script>
 </body>
 </html>
